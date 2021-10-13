@@ -21,7 +21,6 @@
     "types": [
       "@types/node"
     ],
-    "sourceMap": true,
     "baseUrl": "./src",
     "outDir": "./bin",
     "newLine": "lf"

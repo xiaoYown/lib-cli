@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander';
 import { COMMANDS } from './constants/commands';
 import create from './commands/create';
@@ -8,7 +10,7 @@ const program = new Command();
 
 const commands = [
   {
-    command: COMMANDS.CREATE,
+    command: `${COMMANDS.CREATE} [name]`,
     desc: 'Create a library template.',
     action: create,
   },
@@ -29,7 +31,7 @@ commands.forEach(({ command, desc, action }) => {
     .command(`${command}`)
     .description(desc)
     .action((...args) => {
-      action(...args);
+      action(args);
     });
 });
 
