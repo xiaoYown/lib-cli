@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "CommonJS",
+    "strict": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "strictPropertyInitialization": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "esnext"
+    ],
+    "types": [
+      "@types/node"
+    ],
+    "sourceMap": true,
+    "newLine": "lf"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "./node_modules"
+  ]
+}
