@@ -1,14 +1,13 @@
 {
-  "name": "@lib-cli/lib-cli",
+  "name": "@lib-cli/logger",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
   "license": "ISC",
-  "bin": {
-    "lib-cli": "bin/main.js"
-  },
+  "main": "lib/main.js",
   "directories": {
+    "lib": "lib",
     "test": "__tests__"
   },
   "files": [
@@ -29,13 +28,6 @@
   "bugs": {
     "url": "https://github.com/xiaoYown/lib-cli/issues"
   },
-  "dependencies": {
-    "@lib-cli/lib-compile": "^0.0.0",
-    "@lib-cli/logger": "^0.0.0",
-    "commander": "^8.2.0",
-    "download-git-repo": "^3.0.2",
-    "gitly": "^2.1.5"
-  },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/node": "^16.10.1",
@@ -46,7 +38,9 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.3.2",
     "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
   }
 }

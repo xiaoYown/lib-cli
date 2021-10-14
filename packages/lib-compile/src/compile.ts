@@ -3,15 +3,30 @@ import fs from 'fs';
 import * as rollup from 'rollup';
 import { babel } from '@rollup/plugin-babel';
 import rollupTypescript from '@rollup/plugin-typescript';
+import dts from 'rollup-plugin-dts';
+import logger from '@lib-cli/logger';
 import { ENVS } from './constants';
 
 interface Options {
   env: ENVS;
 }
 
+interface InputOptions {
+  input: string;
+  plugins: any[];
+}
+
 const inputOptions = {
   input: path.resolve('./src/index.ts'),
   plugins: [babel({ babelHelpers: 'bundled' }), rollupTypescript()],
+};
+
+const transformInputPotions = (format: string, inputOptions: InputOptions) => {
+  const newInputOptions = { ...inputOptions };
+  if (format === 'es') {
+    newInputOptions.plugins = [...inputOptions.plugins, dts()];
+  }
+  return newInputOptions;
 };
 
 function getPkg() {
@@ -39,52 +54,73 @@ function getTasks() {
   const formats = [
     {
       key: 'main',
+      name: 'library',
       format: 'cjs',
     },
     {
       key: 'module',
+      name: 'library',
       format: 'esm',
     },
     {
+      key: 'types',
+      format: 'es',
+    },
+    {
       key: 'bundle',
+      name: 'library',
       format: 'iife',
     },
-  ].filter(({ key }) => typeof pkg[key] !== 'undefined');
-
-  const tasks = formats.map(item => {
-    const outputOptions: rollup.OutputOptions = {
-      banner,
-      file: path.resolve(pkg[item.key]),
-      format: item.format as rollup.ModuleFormat,
-      name: 'library',
-      sourcemap: true,
-      exports: 'auto',
-    };
-    return outputOptions;
-  });
+  ];
+  const tasks = formats
+    .filter(({ key }) => typeof pkg[key] !== 'undefined')
+    .map(item => {
+      const outputOptions: rollup.OutputOptions = {
+        banner,
+        file: path.resolve(pkg[item.key]),
+        format: item.format as rollup.ModuleFormat,
+        name: item.name,
+        sourcemap: true,
+        exports: 'auto',
+      };
+      return outputOptions;
+    });
 
   return tasks;
 }
 
-async function build(inputOptions, outputOptions) {
-  const bundle = await rollup.rollup(inputOptions);
+let buildingFormats: string[] = [];
 
-  await bundle.write(outputOptions);
-}
+const cleanBuilding = () => (buildingFormats = []);
+const appendBuilding = (format: string) => buildingFormats.push(format);
+const removeBuilding = (_format: string) =>
+  buildingFormats.splice(
+    buildingFormats.findIndex(format => format === _format),
+    1
+  );
 
 function buildDev(tasks) {
   tasks.forEach(outoutOptions => {
     const watcher = rollup.watch({
-      ...inputOptions,
+      ...transformInputPotions(outoutOptions.format, inputOptions),
       output: [outoutOptions],
     });
     watcher.on('event', event => {
       switch (event.code) {
-        case 'BUNDLE_START':
-          console.info(`[LIB CLI] Building ${outoutOptions.format} . . .`);
+        case 'START':
+          appendBuilding(outoutOptions.format);
+          buildingFormats.length === 1 && logger.info('Building . . .');
           break;
-        case 'BUNDLE_END':
-          console.info(`[LIB CLI] Build ${outoutOptions.format} complete.`);
+        case 'END':
+          removeBuilding(outoutOptions.format);
+          if (buildingFormats.length === 0) {
+            logger.success('Build complete.');
+            buildingFormats = [];
+          }
+          break;
+        case 'ERROR':
+          cleanBuilding();
+          logger.error(`Build ${outoutOptions.format} fail.`);
           break;
         default:
       }
@@ -93,10 +129,23 @@ function buildDev(tasks) {
 }
 
 function buildProd(tasks) {
-  console.info('[LIB CLI] Building . . .');
+  logger.info('Building . . .');
+  async function build(inputOptions, outputOptions) {
+    const bundle = await rollup.rollup(inputOptions);
+
+    await bundle.write(outputOptions);
+  }
+
   tasks.forEach(outoutOptions => {
-    build(inputOptions, outoutOptions).then(() => {
-      console.info(`[LIB CLI] Build ${outoutOptions.format} complete.`);
+    appendBuilding(outoutOptions.format);
+    build(
+      transformInputPotions(outoutOptions.format, inputOptions),
+      outoutOptions
+    ).then(() => {
+      removeBuilding(outoutOptions.format);
+      if (buildingFormats.length === 0) {
+        logger.success('Build complete.');
+      }
     });
   });
 }

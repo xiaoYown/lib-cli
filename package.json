@@ -20,6 +20,8 @@
     "dev:cli": "cd ./packages/lib-cli && npm run dev",
     "build:cli": "cd ./packages/lib-cli && npm run build",
     "dev:compile": "cd ./packages/lib-compile && npm run dev",
-    "build:compile": "cd ./packages/lib-compile && npm run build"
+    "build:compile": "cd ./packages/lib-compile && npm run build",
+    "dev:logger": "cd ./packages/logger && npm run dev",
+    "build:logger": "cd ./packages/logger && npm run build"
   }
 }
