@@ -1,7 +1,7 @@
 {
   "name": "@lib-cli/lib-cli",
-  "version": "0.0.0",
-  "description": "> TODO: description",
+  "version": "1.0.0",
+  "description": "A lib cli, to quick create a esm, cjs, iife lib.",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
   "license": "ISC",
@@ -12,7 +12,7 @@
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "bin"
   ],
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"

@@ -1,7 +1,7 @@
 {
   "name": "@lib-cli/lib-compile",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "Lib cli compiler.",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
   "license": "ISC",
