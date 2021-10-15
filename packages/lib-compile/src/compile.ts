@@ -54,12 +54,10 @@ function getTasks() {
   const formats = [
     {
       key: 'main',
-      name: 'library',
       format: 'cjs',
     },
     {
       key: 'module',
-      name: 'library',
       format: 'esm',
     },
     {
@@ -68,7 +66,6 @@ function getTasks() {
     },
     {
       key: 'bundle',
-      name: 'library',
       format: 'iife',
     },
   ];
@@ -79,7 +76,6 @@ function getTasks() {
         banner,
         file: path.resolve(pkg[item.key]),
         format: item.format as rollup.ModuleFormat,
-        name: item.name,
         sourcemap: true,
         exports: 'auto',
       };
@@ -91,13 +87,15 @@ function getTasks() {
 
 let buildingFormats: string[] = [];
 
-const cleanBuilding = () => (buildingFormats = []);
 const appendBuilding = (format: string) => buildingFormats.push(format);
 const removeBuilding = (_format: string) =>
   buildingFormats.splice(
     buildingFormats.findIndex(format => format === _format),
     1
   );
+const cleanBuilding = (): void => {
+  buildingFormats = [];
+};
 
 function buildDev(tasks) {
   tasks.forEach(outoutOptions => {
