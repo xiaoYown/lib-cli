@@ -3,12 +3,15 @@ import fs from 'fs';
 import * as rollup from 'rollup';
 import { babel } from '@rollup/plugin-babel';
 import rollupTypescript from '@rollup/plugin-typescript';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import dts from 'rollup-plugin-dts';
 import logger from '@lib-cli/logger';
 import { ENVS } from './constants';
 
 interface Options {
   env: ENVS;
+  dir?: string;
+  entry?: string;
 }
 
 interface InputOptions {
@@ -16,22 +19,22 @@ interface InputOptions {
   plugins: any[];
 }
 
-const inputOptions = {
-  input: path.resolve('./src/index.ts'),
+const getInputOptions = ({ dir, entry }: { dir: string; entry: string }) => ({
+  input: path.join(dir, entry),
   plugins: [babel({ babelHelpers: 'bundled' }), rollupTypescript()],
-};
+});
 
 const transformInputPotions = (format: string, inputOptions: InputOptions) => {
   const newInputOptions = { ...inputOptions };
   if (format === 'es') {
-    newInputOptions.plugins = [...inputOptions.plugins, dts()];
+    newInputOptions.plugins = [...inputOptions.plugins, nodeResolve, dts()];
   }
   return newInputOptions;
 };
 
-function getPkg() {
+function getPkg(dir: string) {
   return JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), './package.json'), {
+    fs.readFileSync(path.join(dir, './package.json'), {
       encoding: 'utf8',
     })
   );
@@ -47,8 +50,15 @@ function getBanner(pkg) {
   ].join('\n');
 }
 
-function getTasks() {
-  const pkg = getPkg();
+function formatIIFEName(name) {
+  return name
+    .replace(/[^\w][a-zA-Z]/g, (s: string) => s[1].toUpperCase())
+    .replace(/[^\w]/, '')
+    .replace(/^\d+/, '');
+}
+
+function getTasks({ dir }) {
+  const pkg = getPkg(dir);
   const banner = getBanner(pkg);
 
   const formats = [
@@ -57,24 +67,29 @@ function getTasks() {
       format: 'cjs',
     },
     {
+      key: 'bundle',
+      format: 'iife',
+      name: formatIIFEName(pkg.name),
+    },
+    {
       key: 'module',
       format: 'esm',
     },
-    {
+  ];
+  // 有 esmodule 输出, 添加描述文件输出
+  if (typeof pkg.module !== 'undefined') {
+    formats.push({
       key: 'types',
       format: 'es',
-    },
-    {
-      key: 'bundle',
-      format: 'iife',
-    },
-  ];
+    });
+  }
   const tasks = formats
     .filter(({ key }) => typeof pkg[key] !== 'undefined')
     .map(item => {
       const outputOptions: rollup.OutputOptions = {
         banner,
-        file: path.resolve(pkg[item.key]),
+        name: item.name,
+        file: path.join(dir, pkg[item.key]),
         format: item.format as rollup.ModuleFormat,
         sourcemap: true,
         exports: 'auto',
@@ -97,7 +112,7 @@ const cleanBuilding = (): void => {
   buildingFormats = [];
 };
 
-function buildDev(tasks) {
+function buildDev(tasks, inputOptions) {
   tasks.forEach(outoutOptions => {
     const watcher = rollup.watch({
       ...transformInputPotions(outoutOptions.format, inputOptions),
@@ -118,7 +133,13 @@ function buildDev(tasks) {
           break;
         case 'ERROR':
           cleanBuilding();
-          logger.error(`Build ${outoutOptions.format} fail.`);
+          logger.error(
+            `Build ${outoutOptions.format} fail.\n${JSON.stringify(
+              event,
+              null,
+              2
+            )}`
+          );
           break;
         default:
       }
@@ -126,7 +147,7 @@ function buildDev(tasks) {
   });
 }
 
-function buildProd(tasks) {
+function buildProd(tasks, inputOptions) {
   logger.info('Building . . .');
   async function build(inputOptions, outputOptions) {
     const bundle = await rollup.rollup(inputOptions);
@@ -149,9 +170,12 @@ function buildProd(tasks) {
 }
 
 function compile(options: Options): void {
+  const dir = options.dir || process.cwd();
+  const entry = options.entry || './src/index.ts';
   const run = options.env === ENVS.DEVELOPMENT ? buildDev : buildProd;
-  const tasks = getTasks();
-  run(tasks);
+  const inputOptions = getInputOptions({ dir, entry });
+  const tasks = getTasks({ dir });
+  run(tasks, inputOptions);
 }
 
 export default compile;

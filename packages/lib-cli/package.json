@@ -34,7 +34,8 @@
     "@lib-cli/logger": "^0.0.0",
     "commander": "^8.2.0",
     "download-git-repo": "^3.0.2",
-    "gitly": "^2.1.5"
+    "gitly": "^2.1.5",
+    "inquirer": "^8.2.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
