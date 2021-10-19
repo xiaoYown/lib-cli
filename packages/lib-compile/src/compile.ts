@@ -7,31 +7,45 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import dts from 'rollup-plugin-dts';
 import logger from '@lib-cli/logger';
 import { ENVS } from './constants';
+import { getModules } from './utils';
 
 interface Options {
   env: ENVS;
-  dir?: string;
-  entry?: string;
+  treeShaking: boolean;
 }
 
 interface InputOptions {
-  input: string;
+  input: string | string[];
   plugins: any[];
 }
 
+/** 获取当前目录 inputOptions */
 const getInputOptions = ({ dir, entry }: { dir: string; entry: string }) => ({
   input: path.join(dir, entry),
-  plugins: [babel({ babelHelpers: 'bundled' }), rollupTypescript()],
+  plugins: [
+    babel({ babelHelpers: 'bundled' }),
+    rollupTypescript(),
+    nodeResolve,
+  ],
 });
 
-const transformInputPotions = (format: string, inputOptions: InputOptions) => {
+/** 根据输出个数配置 inputOpitons */
+const transformInputPotions = (
+  format: string,
+  inputOptions: InputOptions,
+  treeShking: boolean
+) => {
   const newInputOptions = { ...inputOptions };
   if (format === 'es') {
-    newInputOptions.plugins = [...inputOptions.plugins, nodeResolve, dts()];
+    newInputOptions.plugins = [...inputOptions.plugins, dts()];
+  }
+  if (format === 'esm' && treeShking) {
+    newInputOptions.input = [newInputOptions.input as string, ...getModules()];
   }
   return newInputOptions;
 };
 
+/** 读取 package 信息 */
 function getPkg(dir: string) {
   return JSON.parse(
     fs.readFileSync(path.join(dir, './package.json'), {
@@ -40,6 +54,7 @@ function getPkg(dir: string) {
   );
 }
 
+/** 生成 bannber */
 function getBanner(pkg) {
   return [
     '/*!',
@@ -50,6 +65,7 @@ function getBanner(pkg) {
   ].join('\n');
 }
 
+/** 格式化 iife 输出全局命名 */
 function formatIIFEName(name) {
   return name
     .replace(/[^\w][a-zA-Z]/g, (s: string) => s[1].toUpperCase())
@@ -57,6 +73,7 @@ function formatIIFEName(name) {
     .replace(/^\d+/, '');
 }
 
+/** 获取输出任务列表 */
 function getTasks({ dir }) {
   const pkg = getPkg(dir);
   const banner = getBanner(pkg);
@@ -74,10 +91,14 @@ function getTasks({ dir }) {
     {
       key: 'module',
       format: 'esm',
+      dir: '',
     },
   ];
-  // 有 esmodule 输出, 添加描述文件输出
+  // esm 模块输出处理
   if (typeof pkg.module !== 'undefined') {
+    // tree-shaking 输出目录
+    formats[2].dir = path.join(dir, pkg.module, '..');
+    // 有 esmodule 输出, 添加描述文件输出
     formats.push({
       key: 'types',
       format: 'es',
@@ -89,7 +110,8 @@ function getTasks({ dir }) {
       const outputOptions: rollup.OutputOptions = {
         banner,
         name: item.name,
-        file: path.join(dir, pkg[item.key]),
+        dir: item.dir,
+        file: item.dir ? undefined : path.join(dir, pkg[item.key]),
         format: item.format as rollup.ModuleFormat,
         sourcemap: true,
         exports: 'auto',
@@ -112,10 +134,10 @@ const cleanBuilding = (): void => {
   buildingFormats = [];
 };
 
-function buildDev(tasks, inputOptions) {
+function buildDev(tasks, inputOptions, treeShking) {
   tasks.forEach(outoutOptions => {
     const watcher = rollup.watch({
-      ...transformInputPotions(outoutOptions.format, inputOptions),
+      ...transformInputPotions(outoutOptions.format, inputOptions, treeShking),
       output: [outoutOptions],
     });
     watcher.on('event', event => {
@@ -147,18 +169,17 @@ function buildDev(tasks, inputOptions) {
   });
 }
 
-function buildProd(tasks, inputOptions) {
+function buildProd(tasks, inputOptions, treeShking) {
   logger.info('Building . . .');
   async function build(inputOptions, outputOptions) {
     const bundle = await rollup.rollup(inputOptions);
-
     await bundle.write(outputOptions);
   }
 
   tasks.forEach(outoutOptions => {
     appendBuilding(outoutOptions.format);
     build(
-      transformInputPotions(outoutOptions.format, inputOptions),
+      transformInputPotions(outoutOptions.format, inputOptions, treeShking),
       outoutOptions
     ).then(() => {
       removeBuilding(outoutOptions.format);
@@ -170,12 +191,13 @@ function buildProd(tasks, inputOptions) {
 }
 
 function compile(options: Options): void {
-  const dir = options.dir || process.cwd();
-  const entry = options.entry || './src/index.ts';
-  const run = options.env === ENVS.DEVELOPMENT ? buildDev : buildProd;
+  const { env, treeShaking } = options;
+  const dir = process.cwd();
+  const entry = './src/index.ts';
+  const run = env === ENVS.DEVELOPMENT ? buildDev : buildProd;
   const inputOptions = getInputOptions({ dir, entry });
   const tasks = getTasks({ dir });
-  run(tasks, inputOptions);
+  run(tasks, inputOptions, treeShaking);
 }
 
 export default compile;
