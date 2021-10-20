@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { sync as delSync } from 'del';
 import * as rollup from 'rollup';
 import { babel } from '@rollup/plugin-babel';
 import rollupTypescript from '@rollup/plugin-typescript';
@@ -73,12 +74,19 @@ function formatIIFEName(name) {
     .replace(/^\d+/, '');
 }
 
+interface Format {
+  key: string;
+  format: rollup.ModuleFormat;
+  name?: string;
+  dir?: string;
+}
+
 /** 获取输出任务列表 */
-function getTasks({ dir }) {
+function getTasks({ dir, treeShaking }) {
   const pkg = getPkg(dir);
   const banner = getBanner(pkg);
 
-  const formats = [
+  const formats: Format[] = [
     {
       key: 'main',
       format: 'cjs',
@@ -91,13 +99,18 @@ function getTasks({ dir }) {
     {
       key: 'module',
       format: 'esm',
-      dir: '',
     },
   ];
   // esm 模块输出处理
   if (typeof pkg.module !== 'undefined') {
-    // tree-shaking 输出目录
-    formats[2].dir = path.join(dir, pkg.module, '..');
+    // tree-shaking 目录处理
+    if (treeShaking) {
+      const outputDir = path.join(dir, pkg.module, '..');
+      const esmFormat = formats.find(
+        ({ format }) => format === 'esm'
+      ) as Format;
+      esmFormat.dir = outputDir;
+    }
     // 有 esmodule 输出, 添加描述文件输出
     formats.push({
       key: 'types',
@@ -107,12 +120,18 @@ function getTasks({ dir }) {
   const tasks = formats
     .filter(({ key }) => typeof pkg[key] !== 'undefined')
     .map(item => {
+      if (item.dir) {
+        delSync([item.dir]);
+      } else {
+        delSync([path.join(dir, pkg[item.key], '..')]);
+      }
       const outputOptions: rollup.OutputOptions = {
         banner,
         name: item.name,
         dir: item.dir,
         file: item.dir ? undefined : path.join(dir, pkg[item.key]),
-        format: item.format as rollup.ModuleFormat,
+        preserveModules: !!item.dir,
+        format: item.format,
         sourcemap: true,
         exports: 'auto',
       };
@@ -196,7 +215,7 @@ function compile(options: Options): void {
   const entry = './src/index.ts';
   const run = env === ENVS.DEVELOPMENT ? buildDev : buildProd;
   const inputOptions = getInputOptions({ dir, entry });
-  const tasks = getTasks({ dir });
+  const tasks = getTasks({ dir, treeShaking });
   run(tasks, inputOptions, treeShaking);
 }
 
