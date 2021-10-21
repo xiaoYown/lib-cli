@@ -26,7 +26,7 @@ const getInputOptions = ({ dir, entry }: { dir: string; entry: string }) => ({
   plugins: [
     babel({ babelHelpers: 'bundled' }),
     rollupTypescript(),
-    nodeResolve,
+    nodeResolve(),
   ],
 });
 
@@ -130,14 +130,12 @@ function getTasks({ dir, treeShaking }) {
         name: item.name,
         dir: item.dir,
         file: item.dir ? undefined : path.join(dir, pkg[item.key]),
-        preserveModules: !!item.dir,
         format: item.format,
         sourcemap: true,
         exports: 'auto',
       };
       return outputOptions;
     });
-
   return tasks;
 }
 

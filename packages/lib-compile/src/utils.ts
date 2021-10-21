@@ -8,6 +8,6 @@ export const getModules = (): string[] => {
       const stat = fs.statSync(path.resolve('./src/modules', item));
       return stat.isDirectory();
     })
-    .map(item => path.resolve('./src/modules', item, 'index.ts'));
+    .map(item => path.resolve('./src/modules', `./${item}/${item}.ts`));
   return modules;
 };
