@@ -37,7 +37,11 @@ const commands = [
 const options = [
   {
     name: '-t, --tree-shaking',
-    desc: 'Run with tree-shaking mode',
+    desc: 'Run with tree-shaking mode.',
+  },
+  {
+    name: '-s, --sourcemap',
+    desc: 'Output with sourcemap files.',
   },
 ];
 

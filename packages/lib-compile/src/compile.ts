@@ -13,6 +13,7 @@ import { getModules } from './utils';
 interface Options {
   env: ENVS;
   treeShaking: boolean;
+  sourcemap: boolean;
 }
 
 interface InputOptions {
@@ -82,7 +83,7 @@ interface Format {
 }
 
 /** 获取输出任务列表 */
-function getTasks({ dir, treeShaking }) {
+function getTasks({ dir, treeShaking, sourcemap }) {
   const pkg = getPkg(dir);
   const banner = getBanner(pkg);
 
@@ -131,8 +132,8 @@ function getTasks({ dir, treeShaking }) {
         dir: item.dir,
         file: item.dir ? undefined : path.join(dir, pkg[item.key]),
         format: item.format,
-        sourcemap: true,
         exports: 'auto',
+        sourcemap,
       };
       return outputOptions;
     });
@@ -208,12 +209,12 @@ function buildProd(tasks, inputOptions, treeShking) {
 }
 
 function compile(options: Options): void {
-  const { env, treeShaking } = options;
+  const { env, treeShaking, sourcemap } = options;
   const dir = process.cwd();
   const entry = './src/index.ts';
   const run = env === ENVS.DEVELOPMENT ? buildDev : buildProd;
   const inputOptions = getInputOptions({ dir, entry });
-  const tasks = getTasks({ dir, treeShaking });
+  const tasks = getTasks({ dir, treeShaking, sourcemap });
   run(tasks, inputOptions, treeShaking);
 }
 
