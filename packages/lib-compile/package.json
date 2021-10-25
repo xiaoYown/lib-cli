@@ -1,6 +1,6 @@
 {
   "name": "@lib-cli/lib-compile",
-  "version": "0.0.0",
+  "version": "0.1.0-alpha.0",
   "description": "Lib cli compiler.",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.15.8",
-    "@lib-cli/logger": "^0.0.0",
+    "@lib-cli/logger": "^0.1.0-alpha.0",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-typescript": "^8.2.5",
