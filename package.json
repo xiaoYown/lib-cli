@@ -1,6 +1,5 @@
 {
   "name": "root",
-  "private": true,
   "devDependencies": {
     "lerna": "^3.22.1",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
