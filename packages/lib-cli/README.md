@@ -6,10 +6,11 @@
 # install global or use npx
 npm install @lib-cli/lib-cli -g
 # create single template
-lib-cli create <template>
+lib-cli create <name>
 # create tree-shaking template
+lib-cli create <name> -t
 
-cd <template>
+cd <name>
 
 # dev
 npm run dev
