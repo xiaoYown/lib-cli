@@ -4,9 +4,10 @@
 
 ```sh
 # install global or use npx
-npm install @lib-cli/lib-cli
-# create template
+npm install @lib-cli/lib-cli -g
+# create single template
 lib-cli create <template>
+# create tree-shaking template
 
 cd <template>
 
