@@ -1,6 +1,6 @@
 {
   "name": "@lib-cli/lib-cli",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0",
   "description": "A lib cli, to quick create a esm, cjs, iife lib.",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
@@ -31,8 +31,8 @@
     "url": "https://github.com/xiaoYown/lib-cli/issues"
   },
   "dependencies": {
-    "@lib-cli/lib-compile": "^0.1.0-alpha.0",
-    "@lib-cli/logger": "^0.1.0-alpha.0",
+    "@lib-cli/lib-compile": "^0.1.0",
+    "@lib-cli/logger": "^0.1.0",
     "commander": "^8.2.0",
     "download-git-repo": "^3.0.2",
     "inquirer": "^8.2.0",
