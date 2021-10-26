@@ -1,25 +1,29 @@
-// import * as download from 'download-git-repo';
-import gitly from 'gitly';
 import * as path from 'path';
+import ora from 'ora';
 import logger from '@lib-cli/logger';
-import { repository } from '../../constants/resources';
+import {
+  branchSingle,
+  branchTreeShaking,
+  repository,
+} from '../../constants/resources';
 import { CommandArgs } from '../../typing';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-async function create(_args: CommandArgs) {
-  const dirname = path.resolve(`lib-template-${Date.now()}`);
+const download = require('download-git-repo');
 
-  logger.info('Pulling . . .');
-  try {
-    const res = await gitly(repository, dirname, {});
-    if (res[0]) {
-      logger.success('Pulling success');
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+async function create({ args, options }: CommandArgs) {
+  const name = args[1] || `lib-template-${Date.now()}`;
+  const dirname = path.resolve(name);
+  const branch = options.treeShaking ? branchTreeShaking : branchSingle;
+  const spinner = ora('Pulling . . .').start();
+
+  download(`${repository}#${branch}`, dirname, err => {
+    if (err) {
+      logger.error(err);
     } else {
-      logger.error('Pulling fail');
+      spinner.succeed('Success.');
     }
-  } catch (error) {
-    logger.error(error);
-  }
+  });
 }
 
 export default create;

@@ -52,6 +52,7 @@ commands.forEach(({ command, desc, action }) => {
     .action(() => {
       action({
         options: program.opts(),
+        args: program.args,
       });
     });
 });
