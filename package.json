@@ -16,6 +16,8 @@
   },
   "scripts": {
     "postinstall": "lerna bootstrap --hoist",
+    "release": "npm run build && lerna publish",
+    "build": "npm run build:logger && npm run build:compile && npm run build:cli",
     "dev:cli": "cd ./packages/lib-cli && npm run dev",
     "build:cli": "cd ./packages/lib-cli && npm run build",
     "dev:compile": "cd ./packages/lib-compile && npm run dev",
