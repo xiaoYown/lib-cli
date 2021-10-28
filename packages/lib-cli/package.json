@@ -25,7 +25,7 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "dev": "tsc --watch",
-    "build": "tsc"
+    "build": "npx rimraf bin && tsc"
   },
   "bugs": {
     "url": "https://github.com/xiaoYown/lib-cli/issues"
