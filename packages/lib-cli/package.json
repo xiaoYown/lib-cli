@@ -1,6 +1,6 @@
 {
   "name": "@lib-cli/lib-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A lib cli, to quick create a esm, cjs, iife lib.",
   "author": "xiaoYown <qzy09101018@sina.com>",
   "homepage": "https://github.com/xiaoYown/lib-cli#readme",
