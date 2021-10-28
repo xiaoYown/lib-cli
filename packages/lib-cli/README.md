@@ -5,10 +5,8 @@
 ```sh
 # install global or use npx
 npm install @lib-cli/lib-cli -g
-# create single template
+# create a library template
 lib-cli create <name>
-# create tree-shaking template
-lib-cli create <name> -t
 
 cd <name>
 
@@ -20,7 +18,9 @@ npm run build
 
 ## Commands
 
+```
 create [name] Create a library template.
 dev Watching files change and compile source code immediately
 build Build library.
 help [command] display help for command
+```
