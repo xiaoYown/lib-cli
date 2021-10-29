@@ -25,9 +25,11 @@
     "newLine": "lf"
   },
   "include": [
-    "src"
+    "packages"
   ],
   "exclude": [
-    "./node_modules"
+    "./node_modules",
+    "lib",
+    "bin"
   ]
 }

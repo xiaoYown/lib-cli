@@ -1,3 +1,5 @@
 packages/lib-cli/bin
 packages/lib-compile/lib
 packages/logger/lib
+
+.eslintcache
