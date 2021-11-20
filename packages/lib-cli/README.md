@@ -1,26 +1,28 @@
-# `@lib-cli/lib-cli`
+# @lib-cli/lib-cli
 
-## Usage
+Easy to create a library as single or tree-shaking mode.
+
+## Quick Overview
 
 ```sh
 # install global or use npx
 npm install @lib-cli/lib-cli -g
 # create a library template
-lib-cli create <name>
+lib-cli create my-lib
 
-cd <name>
-
-# dev
-npm run dev
-# build
-npm run build
+cd my-lib
 ```
 
 ## Commands
 
+### dev
+
 ```
-create [name] Create a library template.
-dev Watching files change and compile source code immediately
-build Build library.
-help [command] display help for command
+npm run dev
+```
+
+### build
+
+```
+npm run build
 ```
